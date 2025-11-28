@@ -5,10 +5,10 @@ const ProductCard = ({ product, onQuantityChange, isUrgent, onToggleUrgent }) =>
 
   const handleChange = (e) => {
     const value = e.target.value;
-    // قبول الأرقام فقط
-    if (value === '' || /^\d+$/.test(value)) {
+    // قبول الأرقام الصحيحة والعشرية (مثل 1.5، 2.75)
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
       setQuantity(value);
-      onQuantityChange(product.id, value === '' ? 0 : parseInt(value));
+      onQuantityChange(product.id, value === '' ? 0 : parseFloat(value) || 0);
     }
   };
 
@@ -56,7 +56,7 @@ const ProductCard = ({ product, onQuantityChange, isUrgent, onToggleUrgent }) =>
             </label>
             <input
               type="text"
-              inputMode="numeric"
+              inputMode="decimal"
               value={quantity}
               onChange={handleChange}
               placeholder="0"
