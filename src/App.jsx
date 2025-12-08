@@ -7,6 +7,7 @@ function App() {
   const [showReport, setShowReport] = useState(false);
   const [activeSection, setActiveSection] = useState(null);
   const [urgentProducts, setUrgentProducts] = useState({});
+  const [language, setLanguage] = useState('ar');
 
   const handleQuantityChange = (productId, quantity) => {
     setQuantities(prev => ({
@@ -23,7 +24,8 @@ function App() {
   };
 
   const generateReport = () => {
-    let report = '📊 تقرير الجرد\n';
+    const isArabic = language === 'ar';
+    let report = isArabic ? '📊 تقرير الجرد\n' : '📊 Inventory Report\n';
     report += '━━━━━━━━━━━━━━━━━━\n\n';
     
     let hasItems = false;
@@ -33,12 +35,12 @@ function App() {
       
       if (categoryItems.length > 0) {
         hasItems = true;
-        report += `📦 ${category.category}\n`;
+        report += `📦 ${category.category[language]}\n`;
         report += '─────────────\n';
         
         categoryItems.forEach(item => {
           const urgentMark = urgentProducts[item.id] ? ' ⭐' : '';
-          report += `• ${item.name}: ${quantities[item.id]} ${item.unit}${urgentMark}\n`;
+          report += `• ${item.name[language]}: ${quantities[item.id]} ${item.unit[language]}${urgentMark}\n`;
         });
         
         report += '\n';
@@ -46,7 +48,7 @@ function App() {
     });
     
     if (!hasItems) {
-      report += '❌ لا توجد منتجات مجرودة\n';
+      report += isArabic ? '❌ لا توجد منتجات مجرودة\n' : '❌ No products inventoried\n';
     }
     
     // Add urgent products section
@@ -55,10 +57,10 @@ function App() {
       category.items.forEach(item => {
         if (urgentProducts[item.id]) {
           urgentList.push({
-            name: item.name,
-            category: category.category,
+            name: item.name[language],
+            category: category.category[language],
             quantity: quantities[item.id] || 0,
-            unit: item.unit
+            unit: item.unit[language]
           });
         }
       });
@@ -66,20 +68,21 @@ function App() {
     
     if (urgentList.length > 0) {
       report += '━━━━━━━━━━━━━━━━━━\n';
-      report += '⭐ المنتجات الضرورية للتوفير\n';
+      report += isArabic ? '⭐ المنتجات الضرورية للتوفير\n' : '⭐ Essential Products to Stock\n';
       report += '─────────────\n';
       urgentList.forEach(item => {
         report += `• ${item.name} (${item.category})\n`;
         if (item.quantity > 0) {
-          report += `  الكمية الحالية: ${item.quantity} ${item.unit}\n`;
+          const currentQty = isArabic ? 'الكمية الحالية' : 'Current Quantity';
+          report += `  ${currentQty}: ${item.quantity} ${item.unit}\n`;
         }
       });
       report += '\n';
     }
     
     report += '━━━━━━━━━━━━━━━━━━\n';
-    report += `📅 التاريخ: ${new Date().toLocaleDateString('ar-SA')}\n`;
-    report += `🕐 الوقت: ${new Date().toLocaleTimeString('ar-SA')}`;
+    report += `📅 ${isArabic ? 'التاريخ' : 'Date'}: ${new Date().toLocaleDateString(isArabic ? 'ar-SA' : 'en-US')}\n`;
+    report += `🕐 ${isArabic ? 'الوقت' : 'Time'}: ${new Date().toLocaleTimeString(isArabic ? 'ar-SA' : 'en-US')}`;
     
     return report;
   };
@@ -90,8 +93,11 @@ function App() {
 
   const copyToClipboard = () => {
     const report = generateReport();
+    const successMsg = language === 'ar' 
+      ? '✅ تم نسخ التقرير! يمكنك الآن لصقه في واتساب'
+      : '✅ Report copied! You can now paste it in WhatsApp';
     navigator.clipboard.writeText(report).then(() => {
-      alert('✅ تم نسخ التقرير! يمكنك الآن لصقه في واتساب');
+      alert(successMsg);
     });
   };
 
@@ -107,10 +113,10 @@ function App() {
         <div className="max-w-2xl mx-auto">
           <div className="bg-white rounded-2xl shadow-2xl p-8">
             <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-              📊 تقرير الجرد
+              {language === 'ar' ? '📊 تقرير الجرد' : '📊 Inventory Report'}
             </h2>
             
-            <div className="bg-gray-50 rounded-lg p-6 mb-6 font-mono text-sm whitespace-pre-wrap text-right" dir="rtl">
+            <div className={`bg-gray-50 rounded-lg p-6 mb-6 font-mono text-sm whitespace-pre-wrap ${language === 'ar' ? 'text-right' : 'text-left'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
               {generateReport()}
             </div>
             
@@ -119,13 +125,13 @@ function App() {
                 onClick={copyToClipboard}
                 className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 text-lg"
               >
-                📋 نسخ التقرير
+                {language === 'ar' ? '📋 نسخ التقرير' : '📋 Copy Report'}
               </button>
               <button
                 onClick={resetApp}
                 className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 text-lg"
               >
-                🔄 جرد جديد
+                {language === 'ar' ? '🔄 جرد جديد' : '🔄 New Inventory'}
               </button>
             </div>
           </div>
@@ -153,13 +159,25 @@ function App() {
       {/* Header */}
       <div className="sticky top-0 z-20 bg-white shadow-lg">
         <div className="max-w-7xl mx-auto p-4">
-          <div className="text-center mb-4">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-1">
-              📦 نظام الجرد
-            </h1>
-            <p className="text-gray-600 text-sm sm:text-base">
-              أدخل الكمية المجرودة لكل منتج
-            </p>
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex-1"></div>
+            <div className="text-center flex-1">
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-1">
+                {language === 'ar' ? '📦 نظام الجرد' : '📦 Inventory System'}
+              </h1>
+              <p className="text-gray-600 text-sm sm:text-base">
+                {language === 'ar' ? 'أدخل الكمية المجرودة لكل منتج' : 'Enter the inventoried quantity for each product'}
+              </p>
+            </div>
+            <div className="flex-1 flex justify-end">
+              <button
+                onClick={() => setLanguage(lang => lang === 'ar' ? 'en' : 'ar')}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 text-sm shadow-md"
+                title={language === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
+              >
+                {language === 'ar' ? '🌐 EN' : '🌐 AR'}
+              </button>
+            </div>
           </div>
 
           {/* Navigation Bar */}
@@ -174,7 +192,7 @@ function App() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {category.category}
+                {category.category[language]}
               </button>
             ))}
           </div>
@@ -187,7 +205,7 @@ function App() {
           <div key={category.id} id={`section-${category.id}`} className="mb-12 scroll-mt-32">
             <div className="bg-white rounded-lg shadow-md p-4 mb-4">
               <h2 className="text-2xl font-bold text-gray-800 text-center">
-                {category.category}
+                {category.category[language]}
               </h2>
             </div>
             
@@ -196,6 +214,7 @@ function App() {
                 <ProductCard
                   key={product.id}
                   product={product}
+                  language={language}
                   onQuantityChange={handleQuantityChange}
                   isUrgent={urgentProducts[product.id]}
                   onToggleUrgent={toggleUrgent}
@@ -211,7 +230,7 @@ function App() {
             onClick={handleGenerateReport}
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-2xl transition-all duration-200 text-xl hover:scale-105"
           >
-            📄 إنشاء التقرير
+            {language === 'ar' ? '📄 إنشاء التقرير' : '📄 Generate Report'}
           </button>
         </div>
       </div>

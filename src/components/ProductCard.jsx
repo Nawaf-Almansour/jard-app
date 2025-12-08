@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const ProductCard = ({ product, onQuantityChange, isUrgent, onToggleUrgent }) => {
+const ProductCard = ({ product, language, onQuantityChange, isUrgent, onToggleUrgent }) => {
   const [quantity, setQuantity] = useState('');
 
   const handleChange = (e) => {
@@ -19,7 +19,7 @@ const ProductCard = ({ product, onQuantityChange, isUrgent, onToggleUrgent }) =>
       <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
         <img
           src={product.image}
-          alt={product.name}
+          alt={product.name[language]}
           className="w-full h-full object-cover"
           onError={(e) => {
             e.target.style.display = 'none';
@@ -31,7 +31,7 @@ const ProductCard = ({ product, onQuantityChange, isUrgent, onToggleUrgent }) =>
           <svg className="w-16 h-16 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <p className="text-sm text-gray-500 text-center font-semibold">{product.name}</p>
+          <p className="text-sm text-gray-500 text-center font-semibold">{product.name[language]}</p>
         </div>
         {/* Star Button */}
         <button
@@ -41,7 +41,10 @@ const ProductCard = ({ product, onQuantityChange, isUrgent, onToggleUrgent }) =>
               ? 'bg-yellow-400 hover:bg-yellow-500 scale-110'
               : 'bg-white hover:bg-gray-100'
           }`}
-          title={isUrgent ? 'منتج ضروري' : 'وضع علامة كمنتج ضروري'}
+          title={isUrgent 
+            ? (language === 'ar' ? 'منتج ضروري' : 'Essential product')
+            : (language === 'ar' ? 'وضع علامة كمنتج ضروري' : 'Mark as essential product')
+          }
         >
           <span className={`text-2xl ${isUrgent ? 'animate-pulse' : ''}`}>
             {isUrgent ? '⭐' : '☆'}
@@ -50,17 +53,17 @@ const ProductCard = ({ product, onQuantityChange, isUrgent, onToggleUrgent }) =>
       </div>
       <div className="p-4">
         <h3 className="text-lg font-bold text-gray-800 mb-3 text-center">
-          {product.name}
+          {product.name[language]}
         </h3>
         <div className="space-y-2">
           <div className="flex items-center justify-center gap-2">
             <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-semibold">
-              الوحدة: {product.unit}
+              {language === 'ar' ? 'الوحدة' : 'Unit'}: {product.unit[language]}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <label className="text-sm text-gray-600 whitespace-nowrap">
-              الكمية:
+              {language === 'ar' ? 'الكمية' : 'Quantity'}:
             </label>
             <input
               type="text"
